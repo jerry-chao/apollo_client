@@ -1,0 +1,16 @@
+{application, apollo_client,
+ [{description, "Apollo Config Client for Erlang"},
+  {vsn, "0.1.0"},
+  {registered, []},
+  {mod, {apollo_client_app, []}},
+  {applications,
+   [kernel,
+    stdlib,
+    ibrowse,
+    jsx
+   ]},
+  {env,[]},
+  {modules, []},
+  {licenses, ["Apache 2.0"]},
+  {links, []}
+ ]}. 
