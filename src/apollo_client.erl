@@ -79,11 +79,13 @@ handle_cast(_Msg, State) ->
     {noreply, State}.
 
 handle_info(start_notification_listener, State) ->
-    NotificationRef = spawn_link(fun() -> notification_loop(self(), State) end),
+    Parent = self(),
+    NotificationRef = spawn_link(fun() -> notification_loop(Parent, State) end),
     {noreply, State#state{notification_ref = NotificationRef}};
 
 handle_info({config_changed, Namespaces}, State) ->
     % Fetch new configs only for changed namespaces
+    io:format("config_changed: ~p~n", [Namespaces]),
     NewState = lists:foldl(
         fun(Namespace, StateAcc) ->
             case fetch_config(StateAcc, Namespace) of
@@ -169,10 +171,11 @@ http_get(Url) ->
 notification_loop(Parent, State) ->
     Notifications = build_notification_request(State),
     Url = build_notification_url(State),
-    
+    io:format("parent: ~p, notification_loop start waiting for notifications: ~p~n", [Parent, Notifications]),
     case long_poll_notifications(Url, Notifications, State) of
         {ok, ChangedNotifications} ->
             {ChangedNamespaces, NewNotifications} = process_notifications(ChangedNotifications, State#state.notifications),
+            io:format("ChangedNotifications: ~p ChangedNamespaces:~p, NewNotifications:~p~n", [ChangedNotifications, ChangedNamespaces, NewNotifications]),
             Parent ! {config_changed, ChangedNamespaces},
             notification_loop(Parent, State#state{notifications = NewNotifications});
         {error, timeout} ->
