@@ -27,6 +27,8 @@ start_link(Config) ->
 get_config(Key) ->
     get_config(?DEFAULT_NAMESPACE, Key).
 
+get_config(Namespace, Key) when is_list(Key) ->
+    get_config(Namespace, list_to_binary(Key));
 get_config(Namespace, Key) ->
     gen_server:call(?MODULE, {get_config, Namespace, Key}).
 
@@ -53,7 +55,7 @@ handle_call({get_config, Namespace, Key}, _From, State) ->
     Reply = case maps:get(Namespace, State#state.cache, undefined) of
         undefined -> 
             {error, namespace_not_found};
-        Configs ->
+        Configs when is_map(Configs) ->
             maps:get(Key, Configs, undefined)
     end,
     {reply, Reply, State};
@@ -98,7 +100,12 @@ fetch_config(State, Namespace) ->
     Url = build_config_url(State, Namespace),
     case http_get(Url) of
         {ok, Body} ->
-            {ok, jsx:decode(Body, [return_maps])};
+            case jsx:decode(Body, [return_maps]) of
+                #{<<"configurations">> := Configs} ->
+                    {ok, Configs};
+                _ ->
+                    {error, invalid_response_format}
+            end;
         Error ->
             Error
     end.
