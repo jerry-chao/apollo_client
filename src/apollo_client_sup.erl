@@ -16,6 +16,14 @@ init(Config) ->
 
     ChildSpecs = [
         #{
+            id => spring_cloud_config,
+            start => {spring_cloud_config, start_link, []},
+            restart => permanent,
+            shutdown => 5000,
+            type => worker,
+            modules => [spring_cloud_config]
+        },
+        #{
             id => apollo_client,
             start => {apollo_client, start_link, [Config]},
             restart => permanent,

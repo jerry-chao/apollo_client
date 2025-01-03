@@ -176,17 +176,11 @@ http_get(Url) ->
 notification_loop(Parent, State) ->
     Notifications = build_notification_request(State),
     Url = build_notification_url(State),
-    io:format("parent: ~p, notification_loop start waiting for notifications: ~p~n", [
-        Parent, Notifications
-    ]),
     case long_poll_notifications(Url, Notifications, State) of
         {ok, ChangedNotifications} ->
             {ChangedNamespaces, NewNotifications} = process_notifications(
                 ChangedNotifications, State#state.notifications
             ),
-            io:format("ChangedNotifications: ~p ChangedNamespaces:~p, NewNotifications:~p~n", [
-                ChangedNotifications, ChangedNamespaces, NewNotifications
-            ]),
             Parent ! {config_changed, ChangedNamespaces},
             notification_loop(Parent, State#state{notifications = NewNotifications});
         {error, timeout} ->
