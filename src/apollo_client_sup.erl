@@ -13,7 +13,7 @@ init(Config) ->
         intensity => 1,
         period => 5
     },
-    
+
     ChildSpecs = [
         #{
             id => apollo_client,
@@ -24,5 +24,5 @@ init(Config) ->
             modules => [apollo_client]
         }
     ],
-    
-    {ok, {SupFlags, ChildSpecs}}. 
+
+    {ok, {SupFlags, ChildSpecs}}.

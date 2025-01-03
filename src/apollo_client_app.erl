@@ -8,4 +8,4 @@ start(_StartType, _StartArgs) ->
     apollo_client_sup:start_link(Config).
 
 stop(_State) ->
-    ok. 
+    ok.
